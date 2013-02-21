@@ -3,17 +3,9 @@
 <head>
   <meta charset="utf-8">
   <title>Angular</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/style.css"  media="screen">
   <link rel="stylesheet" href="css/app.css"/>
-</head>
-<body>
-  <ul class="menu">
-    <li><a href="#/view1">view1</a></li>
-    <li><a href="#/view2">view2</a></li>
-  </ul>
-
-  <div ng-view></div>
-
-  <div>Angular seed app: v<span app-version></span></div>
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js"></script>
@@ -24,5 +16,48 @@
   <script src="js/controllers.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/directives.js"></script>
+
+</head>
+<body>
+  <div class="header">
+      <script type="in/Login">
+      Hola, <?js= firstName ?> <?js= lastName ?>.
+      </script>
+    </div>
+    <div class="wrapper_container">
+      <div class="row"><div  id="tweet" class="speech">Hola!</div>
+        <div class="span7 title_header">
+           <h1 class="title_header_h1"><a href="http://eduardomarin.es" class="noLink" ></a></h1>
+          <h4 class="title_header_h4"><a href="http://eduardomarin.es" class="noLink" >Angular.js + Bootstrap + Node.js</a></h4>
+        </div>
+        <div class="span2">
+          <img style="" src="http://eduardomarin.es/emarin/images/edu_profile_webe.jpg"
+          width="114"> 
+        </div>
+      </div>
+      <div class="row">
+        <div class="span9">
+          <div class="header_line" >
+            <a class="blog_link" href="../blog">blog</a>
+          </div>
+        </div>
+      </div>
+      <ul class="menu">
+        <li><a href="#/view1">view1</a></li>
+        <li><a href="#/view2">view2</a></li>
+      </ul>
+
+      <div ng-view></div>
+
+  
+
+      <div class="row" style="margin-top:20px;">
+        <div class="span9">
+          S&iacute;gueme en <a href="http://www.linkedin.com/pub/eduardo-mar%C3%ADn-izquierdo/30/578/8bb" target="blank"><img style="vertical-align:middle;" src="http://eduardomarin.es/wp-content/themes/eduardomarin/images/16/linkedin.png" /></a> <a href="http://www.facebook.com/profile.php?id=1379535762" target="_blank"><img style="vertical-align:middle;" src="http://eduardomarin.es/wp-content/themes/eduardomarin/images/16/facebook.png" /></a> <a href="http://twitter.com/eMarinIzquierdo" target="_blank"><img style="vertical-align:middle;" src="http://eduardomarin.es/wp-content/themes/eduardomarin/images/16/twitter.png" /></a> <a href="http://www.flickr.com/photos/emarin/" target="_blank"><img style="vertical-align:middle;" src="http://eduardomarin.es/wp-content/themes/eduardomarin/images/16/flickr.png" /></a> &copy; Copyright 2011 Eduardo Mar&iacute;n Izquierdo. Todos los derechos reservados.
+          <div class="footer_line" ></div>
+        </div>
+      </div>  
+    </div>        
+    </div>
 </body>
 </html>
