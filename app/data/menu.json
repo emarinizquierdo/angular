@@ -1,3 +1,3 @@
 [	  { "name" : "Home", "path" : "#/home", "submenu" : [] }
-	, { "name" : "Demos", "path" : "", "submenu" : [{ "name" : "demo01", "path" : "#/demo01", "submenu" : [] }]}
+	, { "name" : "Demos", "path" : "#/demos/", "submenu" : [{ "name" : "demo01", "path" : "#/demos/01/demo/01", "submenu" : [] }]}
 ]

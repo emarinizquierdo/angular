@@ -18,10 +18,27 @@ function MenuController($scope, $rootScope, $http, $location){
 	$scope.path = $location.$$path;
 
 	$scope.$on("navigate", function() {
-	    
 	    $scope.path = $location.$$path;
+	   $scope.isActive();
 
 	});
+
+	$scope.isDropdown  = function ( p_submenu ){
+
+		if( p_submenu.length > 0 ){
+			return 'dropdown';
+		}else{
+			return '';
+		}
+	}
+	$scope.isActive  = function ( p_path ){
+
+		if( p_path && $scope.path.indexOf(p_path.substr(1)) >= 0 ){
+			return 'active';
+		}else{
+			return '';
+		}
+	}
 
 }
 

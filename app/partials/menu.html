@@ -1,4 +1,4 @@
-<li ng-repeat="item in items"  ng-class="{'dropdown' : {{(item.submenu.length>0)}}, active : {{(item.path.indexOf(path) > 0) || 'disable' }} }" >
+<li ng-repeat="item in items"  ng-class="{active : isActive(item.path), dropdown: isDropdown(item.submenu)}" >
   <a ng-show="item.submenu.length == 0" href="{{item.path}}">{{item.name}}</a>
   <a ng-show="item.submenu.length &gt; 0" class="dropdown-toggle" data-toggle="dropdown" href="#">{{item.name}}<b class="caret"></b></a>
   <ul ng-show="item.submenu.length &gt; 0" ng-init="items = item.submenu;" class="dropdown-menu" ng-include="'partials/menu.html'">
