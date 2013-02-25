@@ -18,8 +18,8 @@ function MenuController($scope, $rootScope, $http, $location){
 	$scope.path = $location.$$path;
 
 	$scope.$on("navigate", function() {
-	    $scope.path = $location.$$path;
-	   $scope.isActive();
+		$scope.path = $location.$$path;
+		$scope.isActive();
 
 	});
 
@@ -45,6 +45,6 @@ function MenuController($scope, $rootScope, $http, $location){
 function OnNavigate($scope, $rootScope, $location){
 	
 	$rootScope.$broadcast("navigate");
-	
+	prettyPrint();
 }
 

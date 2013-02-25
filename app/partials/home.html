@@ -61,7 +61,20 @@
 	<p>
 	Node.js es un entorno de programación en la capa del servidor basado en el lenguaje de programación Javascript, con I/O de datos en una arquitectura orientada a eventos, y basado en el motor Javascript V8. Fue creado con el enfoque de ser útil en la creación de programas de red altamente escalables, como por ejemplo, servidores web. Fue creado por Ryan Dahl en 2009, y su evolución está apadrinada por la empresa Joyent, que además tiene contratado a Dahl en plantilla.
 	</p>
-	<h3>¿Qué podemos hacer con ellos?</h3>
-	<p></p>
+	<div class="row examples_header">
+		<div class="span6 left">
+			<h4>Lo básico</h4>
+		</div>
+		<div class="span3 right">
+		</div>
+	</div>
+	<div class="row">
+		<div class="span9">
+			<pre class="prettyprint linenums">// Ejemplo básico de servidor web en node.js<br/><br/>// Cargamos el módulo para crear el servidor http.<br/>var http = require('http');<br/><br/>// Configuramos nuestro servidor para responder con Hola Mundo a todas las peticiones.<br/>var server = http.createServer(function (request, response) {<br/>  response.writeHead(200, {&quot;Content-Type&quot;: &quot;text/plain&quot;});<br/>  response.end(&quot;Hola Mundo\n&quot;);<br/>});<br/><br/>// Escuchamos en puerto 8000, IP por defecto to 127.0.0.1<br/>server.listen(8000);<br/><br/>// Mostramos un mensaje conocido en nuestro terminal<br/>console.log(&quot;Server running at http://127.0.0.1:8000/&quot;);
+			</pre>
+		</div>
+	</diV>
+
+	
 </div>
 </div>

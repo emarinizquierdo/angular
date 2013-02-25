@@ -1,0 +1,127 @@
+<h3>Menú con clases dinámicas</h3>
+<p>
+Como primer caso de prueba a mostrar utilizaremos el elemento que hemos tenido que construir para este site. Esto es, un menú con diferentes ítems que pueden tener, a su vez, otros ítems en su interior. Estos elementos deben responder visualmente en función de la ruta en la que nos encontremos. Así, cuando nos encontremos en la ruta asociada al primer ítem, éste debería mostrarse visualmente como activo o seleccionado. En caso contrario, deseleccionarse.
+</p>
+<p>
+Para construir este menú, partimos de unos datos que constituyen su estructura, forman parte del modelo de datos de dicho componente y, por tanto, definiremos los mismos en <code>data/menu.json</code>
+</p>
+
+<p>
+El contenido de este archivo es el siguiente:</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Modelo de datos - elemento menú</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-json linenums">//data/menu.json<br/>[<br/>	  { &quot;name&quot; : &quot;Home&quot;, &quot;path&quot; : &quot;#/home&quot;, &quot;submenu&quot; : [] }<br/>	, { &quot;name&quot; : &quot;Demos&quot;, &quot;path&quot; : &quot;#/demos/&quot;, &quot;submenu&quot; :<br/>	  [<br/>		  { &quot;name&quot; : &quot;Demo 01&quot;, &quot;path&quot; : &quot;#/demos/01/demo/01&quot;, &quot;submenu&quot; : [] }<br/>	  ]<br/>	  }<br/>]</pre>
+	</div>
+</diV>
+<p>
+A partir de ese modelo de datos, debemos generar el menú haciendo uso de elementos que nos ofrece <em>bootstrap</em> a través de diferentes clases y etiquetas comunes del lenguaje <em>HTML</em>, y los diferentes mecanismos que nos ofrece <em>angular</em> para automatizar la generación de dichos elementos.
+</p>
+<p>
+Así, atendemos a la estructura anidada que se le ha conferido al modelo de datos, de la propiedad <em>submenu</em> que nos indica si un determinado ítem tiene o no diferentes subelementos. Así, a la hora de llamar a cada uno de los <em>li</em> que componen un menú de <em>bootstrap</em>, utilizaremos una llamada "recursiva" para reutilizar un <em>template</em> básico dentro del cual se le aplicarán diferntes estilos a través de sus clases en función de diferentes condicionantes.
+</p>
+<p>
+Este template básico es el que sigue
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Template elemento <em>li</em> del menú</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-html linenums">//partials/menu.html<br/>&lt;li ng-repeat=&quot;item in items&quot;  ng-class=&quot;{active : isActive(item.path), dropdown: isDropdown(item.submenu)}&quot; &gt;<br/>  &lt;a ng-show=&quot;item.submenu.length == 0&quot; href=&quot;<span ng:non-bindable>{{item.path}}</span>&quot;&gt;<span ng:non-bindable>{{item.name}}</span>&lt;/a&gt;<br/>  &lt;a ng-show=&quot;item.submenu.length &amp;gt; 0&quot; class=&quot;dropdown-toggle&quot; data-toggle=&quot;dropdown&quot; href=&quot;#&quot;&gt;<span ng:non-bindable>{{item.name}}</span>&lt;b class=&quot;caret&quot;&gt;&lt;/b&gt;&lt;/a&gt;<br/>  &lt;ul ng-show=&quot;item.submenu.length &amp;gt; 0&quot; ng-init=&quot;items = item.submenu;&quot; class=&quot;dropdown-menu&quot; ng-include=&quot;'partials/menu.html'&quot;&gt;<br/>  &lt;/ul&gt;<br/>&lt;/li&gt;</pre>
+	</div>
+</diV>
+<p>
+Por otro lado, el wrapper donde se inyectarán, es el siguiente:
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Include del menú en index.html</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-html linenums">//index.html<br/>&lt;!doctype html&gt;<br/>&lt;html lang=&quot;en&quot; ng-app=&quot;myApp&quot;&gt;<br/>&lt;head&gt;<br/>  &lt;meta charset=&quot;utf-8&quot;&gt;<br/>  &lt;title&gt;Menu Angular&lt;/title&gt;<br/><br/>  &lt;link rel=&quot;stylesheet&quot; href=&quot;lib/bootstrap/css/bootstrap.min.css&quot;/&gt;<br/><br/>  &lt;script src=&quot;lib/bootstrap/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;<br/>  &lt;script src=&quot;lib/angular/angular.js&quot;&gt;&lt;/script&gt;  <br/>  &lt;script src=&quot;js/app.js&quot;&gt;&lt;/script&gt;<br/>  &lt;script src=&quot;js/controllers.js&quot;&gt;&lt;/script&gt;<br/><br/>&lt;/head&gt;<br/>&lt;body&gt;<br/>          <br/>      &lt;ul class=&quot;nav nav-tabs&quot; ng-controller=&quot;MenuController&quot; ng-include=&quot;'partials/menu.html'&quot;&gt;&lt;/ul&gt;<br/><br/>      &lt;div ng-view&gt;&lt;/div&gt;<br/>     <br/>&lt;/body&gt;<br/>&lt;/html&gt;</pre>
+	</div>
+</diV>
+<p>
+	Como podemos ver en la línea 18 de <code>index.html</code>, a través de la sentencia <code>ng-include</code> inyectaremos en dicho elemento el contenido existente bajo ese template. A su vez, en dicho template encontraremos la definición html de nuestro menú, pero realizada de una forma que pueda se reutilizada tanto para elementos del menú de primer nivel (primer nivel en <em>JSON</em>) como de un nivel inferior. Para ello, en dicho templaet, en el posible elemento <em>li</em> indicamos que repetiremos dicha inyección (<code>ng-repeat</code>) para un set determinado y, por cada uno de ellos, aplicaremos en su interior una u otra estructura en función de un selector <code>ng-show</code>. Además, para cada elemento, tendremos que aplicar una u otra clase en función de si será o no "dropdow" para un conjunto de subelementos, o si se encuentra activado o no, en función de la ruta en la que nos encontremos.
+</p>
+<p>
+	Para establecer si el elemento será o no <em>dropdown</em>, nos fijaremos en la longitud del atributo "submenu" del modelo de datos para el ítem actual. A través de la sentencia <code>ng-class</code>, y definido mediante un determinado objeto (en nuestro caso <code>{active : isActive(item.path)}</code>), utilizaremos la función <code>isActive(item.path)</code> definida en el controlador (<code>MenuController($scope, $rootScope, $http, $location)</code>) para, en función de la longitud de dicho submenú devolver el nombre de la clase a aplicar (<code>return 'active'</code>) en caso de que sea "dropdown" o no.
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Función isDropdown</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-javascript linenums">//función para establecer la clase "dropdown"<br/>$scope.isDropdown  = function ( p_submenu ){<br/>	if( p_submenu.length &gt; 0 ){<br/>		return 'dropdown';<br/>	}else{<br/>		return '';<br/>	}<br/>}</pre>
+	</div>
+</diV>
+<p>
+	De la misma forma, para establecer la clase "active" para un ítem de primer nivel, utilizaremos una función en el controlador que establezca el valor de dicha clase:
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Función isActive</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-javascript linenums">//función para establecer la clase "active"<br/>$scope.isActive  = function ( p_path ){<br/>	if( p_path &amp;&amp; $scope.path.indexOf(p_path.substr(1)) &gt;= 0 ){<br/>		return 'active';<br/>	}else{<br/>		return '';<br/>	}<br/>}</pre>
+	</div>
+</diV>
+<p>
+	Visto esto, entendemos cómo en cada iteración recursiva del elemento <em>li</em> se evalúan las expresiones condicionales para determinar si se muestran o no los diferentes elementos <em>HTML</em> a través de <code>ng-show</code> y se ejecuta el par de funciones <code>isDropdown, isActive</code> para establecer el valor de ese par de clases. Sin embargo, en este último caso, y para el caso concreto de la función <code>isActive</code>, dicha comprobación depende de dos valores asociados al ítem. Por un lado, el <em>PATH</em> en el que nos encontremos o hacia el que hayamos navegado y, por otro, el <em>PATH</em> asociado al propio elemento mediante su modelo de datos.
+</p>
+<p>
+	Dicha función, por lo tanto, debe ser ejecutada cada vez que se realice una navegación. Esto implica que, a parte del controlador que hemos definido para el propio menú, sus elementos, y su lógica asociada, debe existir otro controlador asociado al "proveedor de rutas", o <em>$routeProvider</em>.
+</p>
+<p>
+	Ese controlador se asocia directamente en la configuración del módulo de nuestra aplicación, para cada una de las rutas que hemos definido. En nuestro caso, para los niveles superiores del menú:
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Definición del módulo de la aplicación</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-javascript linenums">//definición del módulo de aplicación<br/>'use strict';<br/><br/>// Declare app level module which depends on filters, and services<br/>angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives']).<br/>  config(['$routeProvider', function($routeProvider) {<br/>    $routeProvider.when('/home', {templateUrl: 'partials/home.html', controller: OnNavigate });<br/>    $routeProvider.when('/demos/01/demo/01', {templateUrl: 'partials/demo01.html', controller: OnNavigate });<br/>    $routeProvider.otherwise({redirectTo: '/home'});<br/>  }]);<br/></pre>
+	</div>
+</diV>
+<p>
+	Por otro lado, la definición de dicho controlador, nos permite generar un evento en <em>Angular</em> que "cruza" el <em>scope</em> que encierra a éste controlador, para ser capturado en el <em>scope</em> que delimita al controlador <code>MenuController</code>. Una vez ahí, éste modificará una variable local a dicho <em>scope</em> que disparará de nuevo la ejecución de la función que define si un ítem del menú está activo o no.
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Controlador de navegación</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-javascript linenums">//controlador de navegación<br/>function OnNavigate($scope, $rootScope, $location){<br/>	<br/>	$rootScope.$broadcast(&quot;navigate&quot;);<br/>	prettyPrint();<br/>}</pre>
+	</div>
+</diV>
