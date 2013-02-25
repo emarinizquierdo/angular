@@ -2,11 +2,32 @@
 
 /* Controllers */
 
+function MenuController($scope, $rootScope, $http, $location){
 
-function MyCtrl1() {}
-MyCtrl1.$inject = [];
+	$http.get('data/menu.json').success(function(data) {
+	    $scope.items = data;
+	    $scope.items.forEach(function(e){
+	    	if(e.submenu.length > 0){
+				e.liClass = "dropdown";
+			}else{
+				e.liClass = "";
+			}
+	    });
+	});
 
+	$scope.path = $location.$$path;
 
-function MyCtrl2() {
+	$scope.$on("navigate", function() {
+	    
+	    $scope.path = $location.$$path;
+
+	});
+
 }
-MyCtrl2.$inject = [];
+
+function OnNavigate($scope, $rootScope, $location){
+	
+	$rootScope.$broadcast("navigate");
+	
+}
+
