@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8">
   <title>Angular</title>
-  <link rel="stylesheet" href="css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"/>
   <link rel="stylesheet" href="css/style.css"  media="screen">
   <link rel="stylesheet" href="css/app.css"/>
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js"></script>
   -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="lib/bootstrap/js/bootstrap.min.js"></script>
   <script src="lib/angular/angular.js"></script>
   <script src="js/app.js"></script>
   <script src="js/services.js"></script>
@@ -19,13 +21,8 @@
 
 </head>
 <body>
-  <div class="header">
-      <script type="in/Login">
-      Hola, <?js= firstName ?> <?js= lastName ?>.
-      </script>
-    </div>
     <div class="wrapper_container">
-      <div class="row"><div  id="tweet" class="speech">Hola!</div>
+      <div class="row">
         <div class="span7 title_header">
            <h1 class="title_header_h1"><a href="http://eduardomarin.es" class="noLink" ></a></h1>
           <h4 class="title_header_h4"><a href="http://eduardomarin.es" class="noLink" >Angular.js + Bootstrap + Node.js</a></h4>
@@ -42,14 +39,10 @@
           </div>
         </div>
       </div>
-      <ul class="menu">
-        <li><a href="#/view1">view1</a></li>
-        <li><a href="#/view2">view2</a></li>
-      </ul>
+      
+      <ul class="nav nav-tabs" ng-controller="MenuController" ng-include="'partials/menu.html'"></ul>
 
-      <div ng-view></div>
-
-  
+      <div ng-view></div>  
 
       <div class="row" style="margin-top:20px;">
         <div class="span9">
