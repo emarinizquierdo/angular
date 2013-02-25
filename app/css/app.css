@@ -28,3 +28,29 @@
   content: "";
   padding: 0;
 }
+
+.angular_logo {
+  width:120px;
+}
+
+.bootstrap_logo {
+  width:120px;
+  margin-left: 5px;
+}
+
+.nodejs_logo {
+  width:120px;
+  padding-bottom: 5px;
+}
+
+.input_home {
+  width: 150px;
+}
+
+.examples_header {
+  margin-bottom: 10px;
+}
+
+.examples_header > .right {
+  text-align: right;
+}

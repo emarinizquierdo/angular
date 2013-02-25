@@ -1,1 +1,38 @@
-<p>Esta es la home</p>
+<div class="row">
+<div class="span9">
+	<h4>¿Qué es Angular.js?</h4>
+	<p>
+	HTML es bueno para declarar documentos estáticos pero falla cuando nosotros intentamos usarlo para declarar vistas dinámicas en aplicaciones web. Gracias a Angular.js podemos extender el lenguaje HTML en nuestras aplicaciones. El resultado es un entorno extraordinariamente expresivo, legible y fácil de desarrollar.
+	<div class="row examples_header">
+		<div class="span6 left">
+		</div>
+		<div class="span3 right">
+			<a class="btn btn-primary" href="http://jsfiddle.net/emarinizquierdo/TJCT3/1/" target="_blank"><i class="icon-white icon-pencil"></i> Edítame</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span6">
+			<pre class="prettyprint linenums">
+&lt;!doctype html&gt;<br/>&lt;html ng-app&gt;<br/>  &lt;head&gt;<br/>    &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js&quot;&gt;&lt;/script&gt;<br/>  &lt;/head&gt;<br/>  &lt;body&gt;<br/>    &lt;div&gt;<br/>      &lt;label&gt;Name:&lt;/label&gt;<br/>      &lt;input type=&quot;text&quot; ng-model=&quot;yourName&quot; placeholder=&quot;Enter a name here&quot;&gt;<br/>      &lt;hr&gt;<br/>      &lt;h1&gt;Hello <span ng:non-bindable>{{yourName}}</span>!&lt;/h1&gt;<br/>    &lt;/div&gt;<br/>  &lt;/body&gt;<br/>&lt;/html&gt;
+	</pre>
+		</div>
+		<div class="span3">
+			<div app-run="hello.html" class="well ng-scope"><div>
+			  <label>Nombre:</label>
+			  <input type="text" ng-model="yourName" placeholder="Introduce tu nombre" class="ng-valid ng-dirty input_home">
+			  <hr>
+			  <h4 class="ng-binding">Hola {{yourName}}!</h4>
+			</div>
+			</div>
+		</div>
+	</diV>
+	
+	</p>
+	<h4>¿Qué es Bootstrap?</h4>
+	<p></p>
+	<h4>¿Qué es Node.js?</h4>
+	<p></p>
+	<h4>¿Qué podemos hacer con ellos?</h4>
+	<p></p>
+</div>
+</div>
