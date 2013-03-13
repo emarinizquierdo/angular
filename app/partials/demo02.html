@@ -1,0 +1,119 @@
+<!--<ul class="nav nav-tabs" ng-controller="MenuController" ng-include="'partials/menu.html'"></ul>
+
+<li ng-repeat="item in items"  ng-class="{active : isActive(item.path), dropdown: isDropdown(item.submenu)}" >
+  <a ng-show="item.submenu.length == 0" href="{{item.path}}">{{item.name}}</a>
+  <a ng-show="item.submenu.length &gt; 0" class="dropdown-toggle" data-toggle="dropdown" href="#">{{item.name}}<b class="caret"></b></a>
+  <ul ng-show="item.submenu.length &gt; 0" ng-init="items = item.submenu;" class="dropdown-menu" ng-include="'partials/menu.html'">
+  </ul>
+</li>-->
+<h3>WebSockets y listado dinámico</h3>
+<div class="row examples_header">
+	<div class="span5 left">
+		<p>
+			En esta demo, realizaremos un ejercicio en el cuál utilizaremos un listado dinámico, dentro de una tabla, en el cuál los elementos a añadir son generados por el usuario.
+		</p>
+		<p>
+			Se trata de algo simple, como concepto, pero añadiremos un grado de dificultad obteniendo los datos dinámicos no de un servicio común, si no de las últimas funcionalidades que ofrece HTML5, como son los websockets. Así, levantaremos un servicio en node.js que escuchará por posibles clientes que intenten abrir websockets hacia él. Una vez conectados, el servidor se mantendrá a la escucha de posibles mensajes recibidos por el cliente (o clientes). En este sentido, la lista será compartida por cada uno de los clientes que puedan conectarse. A la recepción de un mensaje, interpretado como un ítem en nuestro listado, será agregado al listado "en la nube" y difundido a los demás clientes. La recepción será tratada por todos y añadida mediante angular a través de su controlador. Añadiremos funcionalidad para borrado de ítems, distinguiendo entre diferentes tipos de mensajes, tanto de llegada al servidor, como al cliente.
+		</p>
+	</div>
+	<div class="span3 well" ng-controller="ToDoList">
+		<form ng-submit="sendItem()" ng-show="!warning" >
+		  <fieldset>
+		    <h4>To Do List:</h4>
+		    <input type="text" placeholder="Enter something to do" ng-model="textInput" name="textInput" >
+		  </fieldset>
+		</form>
+		<table class="table table-striped todoTable" ng-show="items.length != 0" > 
+			<tbody>
+				<tr ng-repeat="item in items">
+					<td class="td_left"><label class="checkbox"><input type="checkbox">{{item.text}}</label></td><td class="td_right" ng-click="removeItem(item.text)" ><i class="icon-remove icon-red"></i></td>
+				</tr>
+			</tbody>
+		</table>
+		<p ng-show="items.length == 0 && !warning" class="text-info text-center">{{textInfo}}</p>
+		<p ng-show="warning" class="text-error text-center">{{textWarning}}</p>
+	</div>
+</div>
+<h4>Servidor</h4>
+<p>
+	Así, como hemos dicho, en primer lugar levantaremos un servicio en node.js que acepte websockets. Para ello hemos utilizado un servicio de hospedaje que soporta websocket bajo node.js. Este servicio, bajo mi criterio, es bastante bueno. Es potente, fiable, rápido de configurar y tiene varias funcionalidades que le hacen muy bueno. Y, por supuesto, es gratis! Hablamos de modulus.io (<a href="https://modulus.io/" target="_blank">https://modulus.io/</a>).
+</p>
+<p>
+	Creamos la lógica del servidor, que levantará el servicio hacia websockets. El contenido de este archivo es el siguiente:
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>App.js WebSocketServer</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-javascript linenums pre-scrollable">&quot;use strict&quot;;<br/> <br/>// Service port <br/>var webSocketsServerPort = process.env.PORT;<br/> <br/>// websocket and http servers<br/>var webSocketServer = require('websocket').server;<br/>var http = require('http');<br/> <br/>/**<br/> * Global variables<br/> */<br/>// latest 100 to do items<br/>var todoList = [ ];<br/>// list of currently connected clients (users)<br/>var clients = [ ];<br/> <br/>/**<br/> * Helper function for escaping input strings<br/> */<br/>function htmlEntities(str) {<br/>    return String(str).replace(/&amp;/g, '&amp;amp;').replace(/&lt;/g, '&amp;lt;')<br/>                      .replace(/&gt;/g, '&amp;gt;').replace(/&quot;/g, '&amp;quot;');<br/>}<br/> <br/>/**<br/> * HTTP server<br/> */<br/>var server = http.createServer(function(request, response) {<br/>    // It is not important for us, we will write on websockets<br/>});<br/><br/>//Bind websocket port<br/>server.listen(webSocketsServerPort, function() {<br/>    console.log((new Date()) + &quot; Server is listening on port &quot; + webSocketsServerPort);<br/>});<br/> <br/>/**<br/> * WebSocket server<br/> */<br/>var wsServer = new webSocketServer({<br/>    httpServer: server<br/>});<br/><br/>//Start when there is a request from a client<br/>wsServer.on('request', function(request) {<br/>    console.log((new Date()) + ' Connection from origin ' + request.origin + '.');<br/><br/>    var connection = request.accept(null, request.origin); <br/>    // we need to know client index to remove them on 'close' event<br/>    var index = clients.push(connection) - 1;<br/> <br/>    console.log((new Date()) + ' Connection accepted.');<br/> <br/>    // send back todoList<br/>    if (todoList.length &gt; 0) {<br/>        connection.sendUTF(JSON.stringify( { type: 'history', data: todoList } ));<br/>    }<br/> <br/>    // user sent some message<br/>    connection.on('message', function(message) {<br/><br/>        if (message.type === 'utf8') { // accept only text<br/><br/>            //get data object from message<br/>            var data = JSON.parse(message.utf8Data);<br/><br/>            //if it is a message, a item, we add to todoList<br/>            if(data.type == &quot;message&quot;){<br/>              //but if it is a &quot;reset&quot; word, we delete all items<br/>              if(data.text == &quot;reset&quot;){<br/>                todoList = [];<br/>                 // broadcast message to all connected clients<br/>                var json = JSON.stringify({ type:'reset', data: {} });<br/>                for (var i=0; i &lt; clients.length; i++) {<br/>                    clients[i].sendUTF(json);<br/>                }<br/>              }else{<br/>                // we check if this item is already in todoList<br/>                var _i = 0;<br/>                for(_i = 0; _i &lt; todoList.length; _i++ ){<br/>                  if ( todoList[_i].text == data.text ){<br/>                    return false;<br/>                  }<br/>                }<br/>                // we want to keep todoList of all sent messages<br/>                var item = {<br/>                    text: htmlEntities(data.text)<br/>                };<br/><br/>                todoList.push(item);<br/>                todoList = todoList.slice(-100);<br/><br/>                // broadcast message to all connected clients<br/>                var json = JSON.stringify({ type:'message', data: item });<br/>                for (var i=0; i &lt; clients.length; i++) {<br/>                    clients[i].sendUTF(json);<br/>                }<br/>              }<br/>            //if data.type is &quot;remove&quot;, we have to remove only this item<br/>            }else if (data.type == &quot;remove&quot;){<br/>              var _i = 0;<br/>              for(_i = 0; _i &lt; todoList.length; _i++ ){<br/>                if ( todoList[_i].text == data.text ){<br/>                  todoList.splice(_i,1);<br/>                  for (_i=0; _i &lt; clients.length; _i++) {<br/>                    clients[_i].sendUTF(JSON.stringify({ <br/>                          type: 'history'<br/>                        , data: todoList <br/>                      })<br/>                    );<br/>                  }<br/>                  return false;<br/>                }<br/>              }<br/><br/>            }<br/>            <br/>        }<br/>    });<br/> <br/>    // user disconnected<br/>    connection.on('close', function(connection) {<br/>      clients.splice(index, 1);<br/>    });<br/> <br/>});</pre>
+	</div>
+</div>
+<p>
+	Así, como podemos observar, el primer paso está relacionado con la definición del servicio de websocket. Entre los diferentes módulos node.js que podemos encontrar para levantar un servicio websocket, utilizaremos el módulo "websocket" (<a href="https://github.com/Worlize/WebSocket-Node" target="_blank">https://github.com/Worlize/WebSocket-Node</a>).
+</p>
+<p>
+	Creamos nuestro websocket y emplazamos su lógica asociada al evento "request". Cada vez que un cliente realice una petición, estableceremos la conexión con éste. Si existen ítems disponibles en nuestro listado (almacenado como variable en el servidor - todoList), le enviaremos esos datos al cliente <code>connection.sendUTF(JSON.stringify( { type: 'history', data: todoList } ));</code>.
+</p>
+<p>
+	El siguiente paso será permanecer a la escucha de posibles mensajes que algún cliente pueda enviarnos. Si llegara, debemos distinguir entre dos tipos de mensaje. Si el tipo que le hemos asociado desde el cliente es de tipo "message", se trata de un ítem que el cliente ha introducido en el "input". En este caso, debemos interpretar la palabra pues, en caso de que sea "reset" resetearemos el listado completo. En caso contrario, se trata de un ítem a añadir al listado, lo que implica comunicarlo a los demás clientes mediante difusión (<code>for (var i=0; i &lt; clients.length; i++) {<br/>                    clients[i].sendUTF(json);<br/>                }</code>).
+</p>
+<p>
+	Si en cambio, el tipo de mensaje es "remove", se trata de una acción particular sobre un elemento del listado. En este caso, el cliente desea eliminar del listado tan sólo el ítem que le estamos indicando.
+</p>
+<h4>Cliente</h4>
+<p>
+	Una vez que tenemos el servidor listo para recibir peticiones de parte de los clientes, éste será el siguiente paso, la implementación de los mismos. Para ello, crearemos una plantilla bajo AngularJS que nos permitirá inyectar el contenido del listado, y que esté preparado para recibir actualizaciones. Dicha plantilla es la siguiente:
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Template Dynamic List</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-html linenums">&lt;div&nbsp;class=&quot;span3&nbsp;well&quot;&nbsp;ng-controller=&quot;ToDoList&quot;&gt;<br/>&nbsp;&nbsp;&nbsp;&lt;form&nbsp;ng-submit=&quot;sendItem()&quot;&nbsp;ng-show=&quot;!warning&quot;&nbsp;&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fieldset&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h4&gt;To&nbsp;Do&nbsp;List:&lt;/h4&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;input&nbsp;type=&quot;text&quot;&nbsp;placeholder=&quot;Enter&nbsp;something&nbsp;to&nbsp;do&quot;&nbsp;ng-model=&quot;textInput&quot;&nbsp;name=&quot;textInput&quot;&nbsp;&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/fieldset&gt;<br/>&nbsp;&nbsp;&nbsp;&lt;/form&gt;<br/>&nbsp;&nbsp;&nbsp;&lt;table&nbsp;class=&quot;table&nbsp;table-striped&nbsp;todoTable&quot;&nbsp;ng-show=&quot;items.length&nbsp;!=&nbsp;0&quot;&nbsp;&gt;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tbody&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tr&nbsp;ng-repeat=&quot;item&nbsp;in&nbsp;items&quot;&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;td&nbsp;class=&quot;td_left&quot;&gt;&lt;label&nbsp;class=&quot;checkbox&quot;&gt;&lt;input&nbsp;type=&quot;checkbox&quot;&gt;{{item.text}}&lt;/label&gt;&lt;/td&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;td&nbsp;class=&quot;td_right&quot;&nbsp;ng-click=&quot;removeItem(item.text)&quot;&nbsp;&gt;&lt;i&nbsp;class=&quot;icon-remove&nbsp;icon-red&quot;&gt;&lt;/i&gt;&lt;/td&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/tr&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/tbody&gt;<br/>&nbsp;&nbsp;&nbsp;&lt;/table&gt;<br/>&nbsp;&nbsp;&nbsp;&lt;p&nbsp;ng-show=&quot;items.length&nbsp;==&nbsp;0&nbsp;&amp;&amp;&nbsp;!warning&quot;&nbsp;class=&quot;text-info&nbsp;text-center&quot;&gt;{{textInfo}}&lt;/p&gt;<br/>&nbsp;&nbsp;&nbsp;&lt;p&nbsp;ng-show=&quot;warning&quot;&nbsp;class=&quot;text-error&nbsp;text-center&quot;&gt;{{textWarning}}&lt;/p&gt;<br/>&lt;/div&gt;</pre>
+	</div>
+</div>
+<p>
+	Utilizaremos un "scope" asociado al DOM que encierra nuestro formulario, y la tabla de resultados. Bajo este "scope", se utilizará el controlador "ToDoList" que encerrará la lógica de control necesaria para conectarse al servidor, enviar los diferentes mensajes hacia el mismo, y recibirá respuesta del servidor.
+</p>
+<div class="row examples_header">
+	<div class="span6 left">
+		<h4>Controller ToDoList in Angular.js</h4>
+	</div>
+	<div class="span3 right">
+	</div>
+</div>
+<div class="row">
+	<div class="span9">
+		<pre class="prettyprint lang-javascript linenums pre-scrollable">function ToDoList($scope, $http){<br/><br/>    $scope.textInput = &quot;&quot;;<br/>    $scope.textInfo = &quot;Yeah! Nothing to do!&quot;;<br/>    $scope.textWarning = &quot;&quot;;<br/>    $scope.warning = false;<br/>    $scope.items = [];<br/><br/>    window.WebSocket = window.WebSocket || window.MozWebSocket;<br/><br/>    if (!window.WebSocket) {<br/>        $scope.$apply(function(){<br/>        	$scope.textWarning =      &quot;I'm sorry, your browser not support&quot;<br/>        							+ &quot;websocket technology yet&quot;;<br/>        });<br/>        $scope.warning = true;<br/>        return;<br/>    }<br/> <br/>    // open connection<br/>    var connection = new WebSocket('ws://eduardomarin-7304.onmodulus.net');<br/> <br/>    connection.onopen = function () {<br/>        // first we want users to enter their names<br/>        //input.removeAttr('disabled');<br/>    };<br/> <br/>    connection.onerror = function (error) {<br/>        // just in there were some problems with conenction...<br/>        $scope.$apply(function(){<br/>        	$scope.textWarning =   &quot;I'm sorry, there is a proble with your &quot;<br/>                            	 + &quot;conection, or server is down.&quot;;<br/>        });<br/>        $scope.warning = true;<br/>    };<br/> <br/>    // most important part - incoming messages<br/>    connection.onmessage = function (message) {<br/>        // try to parse JSON message. Because we know that the server always returns<br/>        // JSON this should work without any problem but we should make sure that<br/>        // the massage is not chunked or otherwise damaged.<br/>        try {<br/>            var json = JSON.parse(message.data);<br/>        } catch (e) {<br/>            console.log('No parece un JSON v&aacute;lido: ', message.data);<br/>            return;<br/>        }<br/> <br/>        // NOTE: if you're not sure about the JSON structure<br/>        // check the server source code above<br/>        if (json.type === 'history') { // entire message history<br/>            $scope.$apply(function(){<br/>            	$scope.items = json.data;<br/>        	});<br/><br/>        } else if (json.type === 'message') { // it's a single message<br/>            //input.removeAttr('disabled'); // let the user write another message<br/>            $scope.$apply(function(){<br/>            	$scope.items.push(json.data);<br/>            });            <br/>        } else if (json.type === 'reset') { // it's a single message<br/>            $scope.$apply(function(){<br/>            	$scope.items = [];<br/>            });<br/>        } else {<br/>            console.log('Hmm..., Nunca he visto un JSON como este: ', json);<br/>        }<br/>    };<br/> <br/>    /**<br/>     * Send mesage when user presses Enter key<br/>     */<br/>    $scope.sendItem = function() {<br/>    	<br/>        var msg = {<br/>        	  type : &quot;message&quot;<br/>        	, text : $scope.textInput<br/>        }<br/><br/>        if (!msg) {<br/>            return;<br/>        }<br/><br/>        var json = JSON.stringify(msg);<br/>        // send the message as an ordinary text<br/>        connection.send(json);<br/>        $scope.textInput = &quot;&quot;;<br/>        <br/>    }<br/> <br/>    /**<br/>     * This method is optional. If the server wasn't able to respond to the<br/>     * in 3 seconds then show some error message to notify the user that<br/>     * something is wrong.<br/>     */<br/>    setInterval(function() {<br/>        if (connection.readyState !== 1) {<br/>        	$scope.$apply(function(){<br/>            	$scope.textWarning =   &quot;I'm sorry. We can't connect &quot;<br/>                                	 + &quot;to Websocket server.&quot;;<br/>            });<br/>            $scope.warning = true;<br/>        } else {<br/>        	$scope.warning = false;<br/>        }<br/>    }, 3000);<br/><br/><br/>	$scope.removeItem  = function ( p_item ){<br/><br/>		connection.send(JSON.stringify({type : &quot;remove&quot;, text : p_item }));<br/>	}<br/>}</pre>
+	</div>
+</div>
+<p>
+	Como podemos observar, el controlador, en primer lugar, comprueba que el navegador es capaz de manejar websockets, en cuyo caso, creará una nueva conexión hacia nuestro servidor. Una vez que se establece la conexión, realizará un "bind" al evento "onmessage" para permanecer a la escucha de lo que pueda enviarle el servidor. Así, en caso de que el servidor tenga un listado "todoList" con ítems que mostrar, el cliente los recibirá y, en función de si viene marcado el mensaje con el tipo "history", actualizará la variable de nuestro "$scope" con dicho valor. En ese momento, Angular.js se encarga de inyectar el contenido a través del template de forma iterativa.
+</p>
+<p>
+	En caso de que el tipo de mensaje no sea "history", se trata de un mensaje fruto de la interacción de otro cliente con el servidor, en cuyo caso debemos actualizar nuestra variable, bien porque ha recibido un nuevo item (push en dicha variable), o porque han efectuado un reset (vaciamos nuestro variable).
+</p>
+<p>
+	Finalmente, en caso de que el usuario realice un submit del formulario, debe componerse un mensaje para enviar al servidor, de tipo "message", con información sobre el mismo. Así mismo, en caso de que el usuario clique sobre el aspa de un item concreto, se enviará un mensaje de tipo "remove" para indicar al servidor el ítem que debe eliminarse.
+</p>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'eduardomarines'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>

@@ -1,5 +1,9 @@
 /* app css stylesheet */
 
+body {
+  text-align: justify;
+}
+
 .menu {
   list-style: none;
   border-bottom: 0.1em solid black;
@@ -53,4 +57,24 @@
 
 .examples_header > .right {
   text-align: right;
+}
+
+.todoTable tbody{
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block;  
+}
+
+.todoTable tbody td {
+  width:153px;
+}
+
+.todoTable tbody td.td_left{
+  display: block;
+}
+
+.todoTable tbody td.td_right{
+  text-align : right;
+  cursor: pointer;
 }
