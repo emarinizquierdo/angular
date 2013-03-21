@@ -78,9 +78,3 @@ body {
   text-align : right;
   cursor: pointer;
 }
-
-.carousel {
-  width : 440px;
-  margin-left: auto;
-  margin-right: auto;
-}

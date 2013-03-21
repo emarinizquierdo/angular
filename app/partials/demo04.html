@@ -1,0 +1,99 @@
+<h3>Carousel Flickr con AngularJS</h3>
+<div class="row examples_header">
+	<div class="span5 left">
+		<p>
+			En el siguiente ejemplo bajo AngularjJS desarrollaremos un carrusel de imágenes en el cuál se unen diferentes técnicas y conceptos útiles.
+		</p>
+		<p>
+			Por un lado, si estamos acostumbrados a realizar un desarrollo modular de aplicaciones, la filosofía UI, he intentado traducir dicho concepto bajo AngularJS, creando un componente que albergara, bajo una estructura de directorios, lo necesario para recogerlo, portarlo y disponerlo bajo un mismo módulo. Bajo este módulo, y las diferentes dependencias creadas hacia sus servicios, controladores y directrices, se dispone el componente listo para usar dentro de una aplicación.
+		</p>
+	</div>
+	<div class="span3 well" >
+		<img src="http://4.bp.blogspot.com/_K9wVnorhKFI/TS4erZOeyXI/AAAAAAAAAt0/p3yZbsbHHyM/s1600/carousel%2B1.jpg" />
+	</div>
+</div>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			Por otro lado, utilizaremos un servicio externo, mediante una llamada JSONP a la API de Flickr, para mostrar las imágenes de diferentes photoSets públicos.
+		</p>
+	</div>
+</div>
+<h4>Estructura UI</h4>
+<div class="row examples_header">
+	<div class="span3">
+	</div>
+	<div class="span6">
+		<p>
+			Como hemos comentado, intentaremos mantener una estructura de directorios sobre la cuál podamos encapsular el modelo, vista y controlador de dicho componente para poder llevarlo fácilmente a cualquier aplicación AngularJS. Así, deberíamos definir claramente el ámbito del controlador, de las directrices, servicios, estilos, plantillas... encerradas bajo el mismo marco. 
+		</p>
+	</div>
+</div>
+<h4>Servicio</h4>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			Partimos con el punto de origen del inflado de nuestro carrusel, esto es, la llamada a la API de Flickr. Dado que estamos realizando la llamada desde un dominio diferente al de Flickr, necesitaremos usar un formato JSONP para evitar las limitaciones CORS. Así, AngularJS nos provee los mecanismos para realizar las peticiones http más comunes de una forma sencilla y potente. Esta llamada la podríamos llevar directamente al controlador, no obstante, haremos uso de los beneficios del método "factory" para crear un servicio directo de extracción de datos totalmente aislado del controlador, y únicamente accesible mediante la interfaz que creamos.
+		</p>
+		<h4>carousel-srv.js</h4>
+		<pre class="prettyprint lang-javascript linenums pre-scrollable">angular.module('flickrService',&nbsp;[])<br/>	.factory('FlickrService',&nbsp;['$http',&nbsp;function($http)&nbsp;{<br/>		return&nbsp;{<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getPhotos:&nbsp;function(&nbsp;p_gallery_id,&nbsp;callback)&nbsp;{<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	&nbsp;&nbsp;<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;_url&nbsp;=&nbsp;'http://api.flickr.com/services/rest/';<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$http({<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	&nbsp;&nbsp;method:&nbsp;&quot;JSONP&quot;<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	,&nbsp;url&nbsp;:&nbsp;_url<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	,&nbsp;params&nbsp;:&nbsp;{<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		&nbsp;&nbsp;method&nbsp;:&nbsp;'flickr.photosets.getPhotos'<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		,&nbsp;api_key&nbsp;:&nbsp;'a6e0d690f58e8ef6c104f10e497faa84'<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		,&nbsp;photoset_id&nbsp;:&nbsp;p_gallery_id<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		,&nbsp;format&nbsp;:&nbsp;'json'<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		,&nbsp;jsoncallback&nbsp;:&nbsp;'JSON_CALLBACK'<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	&nbsp;&nbsp;}<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}).success(function(data)&nbsp;{<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	callback(data);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>	&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;&nbsp;	}]);</pre>
+	</div>
+</div>
+<h4>Directivas</h4>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			Uno de los puntos fuertes de AngularJS (puede ser un arma de doble filo), es el concepto de directiva. Bajo este concepto podemos encerrar, bajo la definición de nuevas etiquetas HTML, toda la lógica que queramos atribuirle al elemento HTML al que asignemos dicha etiqueta. Así, en nuestro ejemplo, usaremos dos directivas para definir, a su vez, el elemento "carousel", que es el equivalente a nuestro componente UI, y otro elemento más simple, que el elemento que define una imagen en concreto dentro de nuestro carrusel.
+		</p>
+		<p>
+			Al definir cada una de estas directivas, se define un ámbito o "scope" asociado a dicha directiva. Bajo él se pueden definir variables, métodos, que se circunscriben al mismo, pudiendo o no utilizar variables de un ámbito mayor (padre), trabajar con la vista asociada, con el modelo existente en dicho ámbito, etc.
+		</p>
+		<p>
+			En uno de estos controladores, en el caso de la directiva del wrapper del carrusel, llevaremos a cabo las operaciones necesarias para efectuar el desplazamiento de las imágenes dentro de nuestro marco del carrusel. Dado que la manipulación de elementos DOM, de momento, no ha sido estudiada por mi parte, haremos uso de jQuery para las funciones de animación. En este punto es importante saber con qué objetos estamos trabajando a la hora de llamar a los métodos de jQuery. Para ello, el controlador identifica su elemento DOM raíz que viene definido por su "scope". Este "scope" podría ser global a la aplicación o local, en función del parámetro de configuración que se indica ("scope":"true").
+		</p>
+		<h4>carousel-drt.js</h4>
+		<pre class="prettyprint lang-javascript linenums pre-scrollable">angular.module('carouselDirectives',&nbsp;[])<br/>&nbsp;&nbsp;.directive('photoItem',&nbsp;function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replace:&nbsp;true,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transclude:&nbsp;true,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scope:true,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;templateUrl:&nbsp;'aui/carousel/template/photo-item.html'<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;})<br/>&nbsp;&nbsp;.directive('wrapperCarousel',&nbsp;function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replace:&nbsp;true,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scope:true,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transclude:&nbsp;true,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;templateUrl:&nbsp;'aui/carousel/template/wrapper-carousel.html',<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;The&nbsp;linking&nbsp;function&nbsp;will&nbsp;add&nbsp;behavior&nbsp;to&nbsp;the&nbsp;template<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;link:&nbsp;function($scope,&nbsp;$element,&nbsp;attrs)&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;slidder&nbsp;=&nbsp;$element.find(&quot;#slidder&quot;);<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.rightClick&nbsp;=&nbsp;function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.indice&nbsp;=&nbsp;($scope.indice&nbsp;+&nbsp;1)&nbsp;%&nbsp;$scope.photos.length;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slidder.animate({&quot;margin-left&quot;&nbsp;:&nbsp;&quot;-=400px&quot;},&nbsp;300,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slidder.children().first().appendTo(slidder);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slidder.css({&quot;margin-left&quot;&nbsp;:&nbsp;&quot;+=400px&quot;});<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.$apply(function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.photoTitle&nbsp;=&nbsp;$scope.photos[$scope.indice].title;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.leftClick&nbsp;=&nbsp;function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.indice&nbsp;=&nbsp;($scope.photos.length&nbsp;+&nbsp;$scope.indice&nbsp;-&nbsp;1)&nbsp;%&nbsp;$scope.photos.length;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slidder.children().last().prependTo(slidder);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slidder.css({&quot;margin-left&quot;&nbsp;:&nbsp;&quot;-=400px&quot;});<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slidder.animate({&quot;margin-left&quot;&nbsp;:&nbsp;&quot;+=400px&quot;},&nbsp;300,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.$apply(function(){<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.photoTitle&nbsp;=&nbsp;$scope.photos[$scope.indice].title;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;})</pre>
+	</div>
+</div>
+<h4>Controladores</h4>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			Si bien cada una de las directivas definidas anteriormente tienen un controlador asociado, llevar la lógica de control hacia uno u otro ámbito dependerá, en cierta medida, de cuánto o qué parte abarcará la lógica que se defina en ese controlador. Así, para nuestro caso, puede pensarse que la configuración inicial y enlace que se realiza al servicio creado, resulta más apropiada realizarla en el controlador de nuestro componente, más que en submódulos más pequeños.
+		</p>
+		<h4>carousel-ctr.js</h4>
+		<pre class="prettyprint lang-javascript linenums pre-scrollable">angular.module('carouselController',&nbsp;[&nbsp;'flickrService'&nbsp;])<br/>.controller('CarouselController',&nbsp;function($scope,&nbsp;$element,&nbsp;FlickrService){<br/><br/>	$scope.CallToFlickr&nbsp;=&nbsp;function(&nbsp;p_gallery_id&nbsp;){<br/><br/>		if(!p_gallery_id){<br/>			p_gallery_id&nbsp;=&nbsp;&quot;72157632397355972&quot;;<br/>		}<br/><br/>		FlickrService.getPhotos(&nbsp;p_gallery_id,&nbsp;function(data){&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><br/>			if(data.code&nbsp;==&nbsp;1){<br/>				$scope.warningNoConnection&nbsp;=&nbsp;data.message;<br/>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	$scope.warning&nbsp;=&nbsp;true;<br/><br/>			}else{<br/><br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.photos&nbsp;=&nbsp;data.photoset.photo;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.indice&nbsp;=&nbsp;0;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.warning&nbsp;=&nbsp;false;<br/>				$scope.loaded&nbsp;=&nbsp;true;<br/><br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.photoObjects&nbsp;=&nbsp;[];<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for(var&nbsp;_i&nbsp;=&nbsp;0;&nbsp;_i&nbsp;&lt;&nbsp;$scope.photos.length;&nbsp;_i++){<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	$scope.photoObjects[_i]&nbsp;=&nbsp;new&nbsp;Image();<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	$scope.photoObjects[_i].src&nbsp;=&nbsp;&quot;http://farm&quot;+$scope.photos[_i].farm+&quot;.staticflickr.com/&quot;+$scope.photos[_i].server+&quot;/&quot;+$scope.photos[_i].id+&quot;_&quot;+$scope.photos[_i].secret+&quot;_z.jpg&quot;;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	$scope.photoObjects[_i].onload&nbsp;=&nbsp;onloadPhotos;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/><br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.photoTitle&nbsp;=&nbsp;$scope.photos[0].title;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$scope.toLoad&nbsp;=&nbsp;$scope.photos.length;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;}<br/><br/>		&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;onloadPhotos(){<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	--$scope.toLoad;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	if($scope.toLoad&nbsp;==&nbsp;0){<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		$scope.$apply(function(){<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			$scope.loaded&nbsp;=&nbsp;false;<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		});		<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	}<br/>		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>	&nbsp;&nbsp;&nbsp;&nbsp;});<br/>	}<br/><br/>	$scope.CallToFlickr(&nbsp;'72157632397355972'&nbsp;);<br/>&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;<br/>});</pre>
+	</div>
+</div>
+<h4>Plantillas</h4>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			Por último nos queda la parte que se encargará de presentar los datos mediante las siguientes plantillas:
+		</p>
+		<h4>photo-item.html</h4>
+		<pre class="prettyprint lang-html linenums pre-scrollable">&lt;div&nbsp;ng-controller=&quot;CarouselController&quot;&nbsp;&gt;<br/>&lt;div&nbsp;class=&quot;wrapperCarousel&quot;&nbsp;&gt;<br/>	&lt;div&nbsp;class=&quot;leftButton&quot;&nbsp;ng-click=&quot;leftClick()&quot;&nbsp;&gt;&lt;li&nbsp;class=&quot;icon-chevron-left&nbsp;icon-white&quot;&gt;&lt;/li&gt;&lt;/div&gt;<br/>	&lt;div&nbsp;class=&quot;wrapperSlidder&quot;&nbsp;&gt;<br/>		&lt;div&nbsp;id=&quot;warning&quot;&nbsp;ng-show=&quot;warning&quot;&gt;I'm&nbsp;sorry:&nbsp;{{warningNoConnection}}&lt;/div&gt;<br/>		&lt;div&nbsp;id=&quot;loader&quot;&nbsp;ng-show=&quot;loaded&quot;&gt;&lt;div&nbsp;class=&quot;wrapperImg&quot;&gt;&lt;img&nbsp;src=&quot;aui/carousel/pix/loading_gif.gif&quot;&nbsp;/&gt;&lt;/div&gt;&lt;/div&gt;<br/>		&lt;div&nbsp;class=&quot;photoSlidder&quot;&nbsp;id=&quot;slidder&quot;&gt;<br/>			&lt;div&nbsp;photo-item&nbsp;ng-repeat=&quot;photo&nbsp;in&nbsp;photos&quot;&nbsp;class=&quot;photoItem&quot;&gt;&lt;/div&gt;<br/>		&lt;/div&gt;<br/>	&lt;/div&gt;<br/>	&lt;div&nbsp;class=&quot;photoTitle&quot;&nbsp;ng-show=&quot;!warning&quot;&nbsp;ng-bind-html-unsafe=&quot;photoTitle&quot;&gt;&lt;/div&gt;<br/>	&lt;div&nbsp;class=&quot;rightButton&quot;&nbsp;ng-click=&quot;rightClick()&quot;&nbsp;&gt;&lt;li&nbsp;class=&quot;icon-chevron-right&nbsp;icon-white&quot;&gt;&lt;/li&gt;&lt;/div&gt;<br/>&lt;/div&gt;<br/>&lt;label&gt;Gallery&nbsp;Id:&nbsp;&lt;/label&gt;&lt;input&nbsp;ng-change=&quot;CallToFlickr(galleryId)&quot;&nbsp;ng-model=&quot;galleryId&quot;&nbsp;type=&quot;text&quot;&nbsp;placeholder=&quot;Ignacio&nbsp;Izquierdo&nbsp;Gallery&quot;&gt;&lt;/input&gt;<br/>&lt;/div&gt;</pre>
+	</div>
+	<p>
+		El resultado final puede verse a continuación:
+	</p>
+</div>
+<div class="carousel well">    
+    <div wrapper-carousel></div>
+    <h4>Other photosets:</h4>
+    <code>72157602340001045</code>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'eduardomarines'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+

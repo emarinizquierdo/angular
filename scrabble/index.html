@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+  <meta charset="utf-8">
+  <title>Scrabble</title>
+
+  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/app.css"/>  
+
+  <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js"></script>
+  -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="lib/angular/angular.js"></script> 
+  <script src="lib/kinetic/kinetic-v4.3.3.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/directives.js"></script>
+  <script src="http://cdn.socket.io/stable/socket.io.js"></script>
+
+  
+</head>
+<body>
+    
+
+    <div id="tablero" ng-controller="Tablero">
+
+      <div ng-repeat="ficha in fichas" base-chip></div>
+
+    </div>
+
+
+</body>
+</html>
