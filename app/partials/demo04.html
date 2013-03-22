@@ -1,15 +1,19 @@
 <h3>Carousel Flickr con AngularJS</h3>
 <div class="row examples_header">
-	<div class="span5 left">
+	<div class="span9">
 		<p>
 			En el siguiente ejemplo bajo AngularjJS desarrollaremos un carrusel de imágenes en el cuál se unen diferentes técnicas y conceptos útiles.
 		</p>
+	</div>
+</div>
+<div class="carousel well">    
+	<div wrapper-carousel></div>
+</div>
+<div class="row examples_header">
+	<div class="span9">
 		<p>
 			Por un lado, si estamos acostumbrados a realizar un desarrollo modular de aplicaciones, la filosofía UI, he intentado traducir dicho concepto bajo AngularJS, creando un componente que albergara, bajo una estructura de directorios, lo necesario para recogerlo, portarlo y disponerlo bajo un mismo módulo. Bajo este módulo, y las diferentes dependencias creadas hacia sus servicios, controladores y directrices, se dispone el componente listo para usar dentro de una aplicación.
 		</p>
-	</div>
-	<div class="span3 well" >
-		<img src="http://4.bp.blogspot.com/_K9wVnorhKFI/TS4erZOeyXI/AAAAAAAAAt0/p3yZbsbHHyM/s1600/carousel%2B1.jpg" />
 	</div>
 </div>
 <div class="row examples_header">
@@ -22,10 +26,17 @@
 <h4>Estructura UI</h4>
 <div class="row examples_header">
 	<div class="span3">
+		<img src="img/carousel_directory.jpg" alt="Organización carousel" />
 	</div>
 	<div class="span6">
 		<p>
 			Como hemos comentado, intentaremos mantener una estructura de directorios sobre la cuál podamos encapsular el modelo, vista y controlador de dicho componente para poder llevarlo fácilmente a cualquier aplicación AngularJS. Así, deberíamos definir claramente el ámbito del controlador, de las directrices, servicios, estilos, plantillas... encerradas bajo el mismo marco. 
+		</p>
+		<p>
+			De esta forma, el componente puede llevarse a cualquier aplicación AngularJS. Símplemente debemos incluir el módulo dentro de la aplicación principal, haciendo uso del inyector de dependencias.
+		</p>
+		<p> 
+			Así, en nuestra aplicación basta con usar: <code>angular.module('myApp', [ 'flickrCarousel' ]);</code> para que AngularJS, internamente, se encarge de 	ordenar las dependencias en las llamadas javascript.
 		</p>
 	</div>
 </div>
@@ -74,14 +85,6 @@
 		<h4>photo-item.html</h4>
 		<pre class="prettyprint lang-html linenums pre-scrollable">&lt;div&nbsp;ng-controller=&quot;CarouselController&quot;&nbsp;&gt;<br/>&lt;div&nbsp;class=&quot;wrapperCarousel&quot;&nbsp;&gt;<br/>	&lt;div&nbsp;class=&quot;leftButton&quot;&nbsp;ng-click=&quot;leftClick()&quot;&nbsp;&gt;&lt;li&nbsp;class=&quot;icon-chevron-left&nbsp;icon-white&quot;&gt;&lt;/li&gt;&lt;/div&gt;<br/>	&lt;div&nbsp;class=&quot;wrapperSlidder&quot;&nbsp;&gt;<br/>		&lt;div&nbsp;id=&quot;warning&quot;&nbsp;ng-show=&quot;warning&quot;&gt;I'm&nbsp;sorry:&nbsp;{{warningNoConnection}}&lt;/div&gt;<br/>		&lt;div&nbsp;id=&quot;loader&quot;&nbsp;ng-show=&quot;loaded&quot;&gt;&lt;div&nbsp;class=&quot;wrapperImg&quot;&gt;&lt;img&nbsp;src=&quot;aui/carousel/pix/loading_gif.gif&quot;&nbsp;/&gt;&lt;/div&gt;&lt;/div&gt;<br/>		&lt;div&nbsp;class=&quot;photoSlidder&quot;&nbsp;id=&quot;slidder&quot;&gt;<br/>			&lt;div&nbsp;photo-item&nbsp;ng-repeat=&quot;photo&nbsp;in&nbsp;photos&quot;&nbsp;class=&quot;photoItem&quot;&gt;&lt;/div&gt;<br/>		&lt;/div&gt;<br/>	&lt;/div&gt;<br/>	&lt;div&nbsp;class=&quot;photoTitle&quot;&nbsp;ng-show=&quot;!warning&quot;&nbsp;ng-bind-html-unsafe=&quot;photoTitle&quot;&gt;&lt;/div&gt;<br/>	&lt;div&nbsp;class=&quot;rightButton&quot;&nbsp;ng-click=&quot;rightClick()&quot;&nbsp;&gt;&lt;li&nbsp;class=&quot;icon-chevron-right&nbsp;icon-white&quot;&gt;&lt;/li&gt;&lt;/div&gt;<br/>&lt;/div&gt;<br/>&lt;label&gt;Gallery&nbsp;Id:&nbsp;&lt;/label&gt;&lt;input&nbsp;ng-change=&quot;CallToFlickr(galleryId)&quot;&nbsp;ng-model=&quot;galleryId&quot;&nbsp;type=&quot;text&quot;&nbsp;placeholder=&quot;Ignacio&nbsp;Izquierdo&nbsp;Gallery&quot;&gt;&lt;/input&gt;<br/>&lt;/div&gt;</pre>
 	</div>
-	<p>
-		El resultado final puede verse a continuación:
-	</p>
-</div>
-<div class="carousel well">    
-    <div wrapper-carousel></div>
-    <h4>Other photosets:</h4>
-    <code>72157602340001045</code>
 </div>
 <div id="disqus_thread"></div>
 <script type="text/javascript">
