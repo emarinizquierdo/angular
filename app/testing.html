@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+  <meta charset="utf-8">
+  <title>Angular Testing</title>
+
+  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"/>
+
+
+  <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js"></script>
+  -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="lib/angular/angular.js"></script>  
+
+
+
+  
+</head>
+<body ng-app="myApp">
+
+<div ng-controller="controller01"> 
+  <input ng-model="data.message" ></input>
+  <div>{{data.message}}</div><br/><br/>
+</div>
+
+<div ng-controller="controller02"> 
+  <input ng-model="data.message" ></input>
+  <div>{{data.message}}</div><br/><br/>
+</div>
+
+<div ng-controller="controller03"> 
+  <input ng-model="data.message" ></input>
+  <div>{{data.message}}</div><br/><br/>
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+var myApp = angular.module('myApp', []);
+
+
+myApp.controller('controller01', function($scope, Data){
+
+  $scope.data = Data
+
+})
+.controller('controller02', function($scope, Data){
+$scope.data = Data;
+
+})
+.controller('controller03', function($scope, Data){
+$scope.data = Data;
+
+});
+
+myApp.factory("Data", function(){
+  return {message : "this is a message"};
+});
+
+
+</script>
+</html>
