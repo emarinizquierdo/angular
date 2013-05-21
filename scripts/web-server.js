@@ -4,7 +4,8 @@ var util = require('util'),
     http = require('http'),
     fs = require('fs'),
     url = require('url'),
-    events = require('events');
+    events = require('events'),
+    Firebase = require('firebase');
 
 var DEFAULT_PORT = 8000;
 
@@ -51,19 +52,28 @@ HttpServer.prototype.parseUrl_ = function(urlString) {
 };
 
 HttpServer.prototype.handleRequest_ = function(req, res) {
-  var logEntry = req.method + ' ' + req.url;
-  if (req.headers['user-agent']) {
-    logEntry += ' ' + req.headers['user-agent'];
+
+  if (req.method==="PUT" || req.method==="POST") {
+    
+    POSTHandler(req, res);
+  
+  } else{
+
+    var logEntry = req.method + ' ' + req.url;
+    if (req.headers['user-agent']) {
+      logEntry += ' ' + req.headers['user-agent'];
+    }
+    util.puts(logEntry);
+    req.url = this.parseUrl_(req.url);
+    var handler = this.handlers[req.method];
+    if (!handler) {
+      res.writeHead(501);
+      res.end();
+    } else {
+      handler.call(this, req, res);
+    }
   }
-  util.puts(logEntry);
-  req.url = this.parseUrl_(req.url);
-  var handler = this.handlers[req.method];
-  if (!handler) {
-    res.writeHead(501);
-    res.end();
-  } else {
-    handler.call(this, req, res);
-  }
+
 };
 
 /**
@@ -90,6 +100,8 @@ StaticServlet.prototype.handleRequest = function(req, res) {
   var path = ('./' + req.url.pathname).replace('//','/').replace(/%(..)/g, function(match, hex){
     return String.fromCharCode(parseInt(hex, 16));
   });
+
+  debugger;
   var parts = path.split('/');
   if (parts[parts.length-1].charAt(0) === '.')
     return self.sendForbidden_(req, res, path);
@@ -239,6 +251,82 @@ StaticServlet.prototype.writeDirectoryIndex_ = function(req, res, path, files) {
   res.write('</ol>');
   res.end();
 };
+
+//POST handler for hermes
+function POSTHandler(req, res){
+
+
+  
+  util.puts("POST received");
+  
+  var parameters = {};
+
+    var body = '';
+    req.on('data', function (data) {
+        body += data;
+        if (body.length > 1e6) {
+            // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
+            req.connection.destroy();
+        }
+    });
+    req.on('end', function () {
+        var temp_parameters = body.split("&");
+        for(var i=0; i< temp_parameters.length; i++){
+          var auxKeyValue = temp_parameters[i].split("=");
+          parameters[auxKeyValue[0]] = auxKeyValue[1] ;
+          go_on(parameters);
+        }
+
+    });
+
+  function go_on(parameters){
+
+    if(parameters.logout){
+      headers = [];
+      headers.push(["Connection", "close"]);
+      headers.push(["Content-Type", "application/json"]);
+      headers.push(["Set-Cookie",  "UserID=; Max-Age=-1; Version=1;"]);
+      headers.push(["Set-Cookie", "UserEmail=; Max-Age=-1; Version=1;"]);
+      res.writeHead(200, "OK", headers);
+      var aux = { "state" : "ok" };
+      res.end(JSON.stringify(aux));
+      
+    }else if(parameters.login){
+
+      var Users = new Firebase('https://hermes.firebaseIO.com/users');
+
+      Users.on('value', function(snapshot) { 
+        var users = snapshot.val();
+        Users.off('value');
+        var existUser = false;
+
+        for (user in users){
+          if(users[user].email == parameters.email && users[user].password == parameters.password ){
+            existUser = true;
+          }
+        };
+
+        headers = [];
+        headers.push(["Connection", "close"]);
+        headers.push(["Content-Type", "application/json"]);
+
+        if(!existUser){
+          res.writeHead(200, "OK", headers);
+          var aux = { "state" : "ko" };
+          res.end(JSON.stringify(aux));
+        }else{
+          headers.push(["Set-Cookie",  "UserID="+user+"; Max-Age=3600; Version=1;"]);
+          headers.push(["Set-Cookie", "UserEmail="+users[user].email+"; Max-Age=3600; Version=1;"]);
+          res.writeHead(200, "OK", headers);
+          var aux = { "state" : "ok" };
+          res.end(JSON.stringify(aux));
+        }
+      
+      });
+    }
+  }
+
+}
 
 // Must be last,
 main(process.argv);

@@ -35,6 +35,11 @@
   <div>{{data.message}}</div><br/><br/>
 </div>
 
+<div ng-controller="controller04"> 
+  <div>{{fromJson}}</div>
+  <button ng-click="ShowThis()">Click</div>
+</div>
+
 </body>
 
 <script type="text/javascript">
@@ -54,12 +59,32 @@ $scope.data = Data;
 .controller('controller03', function($scope, Data){
 $scope.data = Data;
 
+})
+.controller('controller04', function($scope, Data, DataExample){
+
+
+  $scope.ShowThis = function(){
+
+    $scope.fromJson = DataExample.key01;
+  }
+
 });
+
 
 myApp.factory("Data", function(){
   return {message : "this is a message"};
 });
 
+myApp.factory("DataExample", function(){
+
+  return {
+    getData : function(){
+
+      return {"key01" : "value01"}
+
+    }
+  }
+});
 
 </script>
 </html>

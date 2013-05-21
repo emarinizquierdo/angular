@@ -1,0 +1,55 @@
+<meta name="fragment" content="!" />
+<h3>Google Maps bajo AngularJS como Directiva</h3>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			En el siguiente ejemplo bajo AngularjJS mostraremos una de las formas en las que podemos encapsular un elemento complejo, bajo una directiva Angular.
+		</p>
+		<p>
+			Este concepto es muy cercano al de UIs, donde podemos encerrar servicios, funcionalidad, vista, para, más tarde, utilizarlo mediante una librería a partir de una simple etiqueta encerrada como atributo (o no) en un elemento DOM.
+		</p>
+	</div>
+</div>
+<div class="well">    
+	<div angular-map style="height:400px; width:600px;"></div>
+	<label>Prueba con algunas de estas rutas:</label>
+	<p class="text-info">
+		http://www.senderosdelsistemacentral.com/descarga/GR_10_Etapa_1__Ruta_desde_San_Ma.kml
+		http://www.senderosdelsistemacentral.com/descarga/GR_10_ramal_Norte:_Etapa_4__Reco.kml
+		http://www.senderosdelsistemacentral.com/descarga/PR-CC_37__Ruta_por_los_bosques_d.kml
+	</p>
+</div>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			Para este ejemplo, utilizaremos la api de Google, Maps Google Api, para mostrar un mapa y un input de entrada. Dicho input será fuente de url a un recurso "kml" que nosotros le entreguemos y, si dicho recurso está bien formado, nos mostrará la ruta geográfica que contiene. La ventaja es, como habíamos comentado, la encapsulación que se obtiene. La portabilidad, al poder entregarlo bajo un único archivo javascript (obviando dependencias externas como librerías o imágenes), y la potencia que ofrece AngularJS en el data-binding ofrecido desde el input hacia el controlador del mapa (si bien, la lógica interna en ese sentido, para este ejemplo, es mínima).
+		</p>
+	</div>
+</div>
+<h4>Estructura UI</h4>
+<div class="row examples_header">
+	<div class="span9">
+		<p>
+			Si bien en módulos anteriores definíamos toda la estructura de los mismos separando en diferentes archivos directivas, servicios, controladores, imágenes y demás recursos, en este caso, la idea es mantener dichas partes bajo un mismo fichero, llevando la portabilidad a su máxima expresión.
+		</p>
+		<p>
+			Así, la división se hace interna, presentando las diferenes posibles partes funcionales añadidas directamente sobre el mismo archivo. Así, podemos ver como, en este caso, únicamente definimos el módulo que encerrará toda nuestra funcionalidad ("amap"), y definimos la directiva que lo encapsulará ("angularMap"). Si hubiéramos necesitado de algún servicio, se habría añadido al mismo nivel. Vemos como el controlador, en este caso, se encierra en la directiva, así como el "template".
+		</p>
+		<h4>amap.js</h4>
+		<pre class="prettyprint lang-javascript linenums pre-scrollable"><br/>//AMAP Module Creation<br/>var amap = angular.module(&quot;amap&quot;,[]);<br/><br/>//Directive<br/>amap.directive(&quot;angularMap&quot;, function(){<br/><br/>  var directiveDefinitionObject = {<br/><br/>  priority: 0,<br/>  scope: true,<br/>  template: 	'&lt;div style=&quot;margin:20px&quot;&gt;&lt;div class=&quot;well&quot; id=&quot;mapWrapper&quot; style=&quot;margin-bottom:10px&quot;&gt;&lt;div id=&quot;map-canvas&quot; style=&quot;height:100%;&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;label&gt;Archivo de Ruta:&lt;/label&gt;&lt;div class=&quot;input-append&quot;&gt;&lt;input class=&quot;span2&quot; id=&quot;appendedInputButton&quot; type=&quot;text&quot; ng-model=&quot;route&quot; /&gt;&lt;button class=&quot;btn&quot; type=&quot;button&quot; ng-click=&quot;reloadRoute()&quot;&gt;Mostrar&lt;/button&gt;&lt;/div&gt;',<br/>  replace: true,<br/>  controller: function($scope, $element, $attrs, $transclude) {<br/><br/>    $scope.route = &quot;&quot;;<br/><br/>    $scope.MapOptions = {<br/>      zoom: 8,<br/>      center: new google.maps.LatLng(40.479, -3.589),<br/>      mapTypeId: google.maps.MapTypeId.ROADMAP<br/>    };<br/><br/>    $scope.map = new google.maps.Map($element.find(&quot;#map-canvas&quot;)[0], $scope.MapOptions);<br/><br/>    var elementWrapper = $element.find(&quot;#mapWrapper&quot;);<br/>    elementWrapper.height( $element.height() - 100 );<br/><br/>    $scope.reloadRoute = function(){<br/><br/>      var routeKML = new google.maps.KmlLayer({ url : $scope.route });<br/>      routeKML.setMap($scope.map);<br/>    }<br/><br/>  }<br/>  };<br/>	<br/>  return directiveDefinitionObject;<br/>});</pre>
+	</div>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'eduardomarines'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+

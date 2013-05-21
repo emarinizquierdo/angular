@@ -1,0 +1,24 @@
+/* app css stylesheet */
+
+body {
+  text-align: justify;
+}
+
+.appNavbar {
+  margin-bottom: 15px;
+}
+
+.viewWrapper {
+  padding: 60px;
+  margin-bottom: 30px;
+  color: inherit;
+  background-color: #eee;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+}
+
+.modalSmall {
+	width : 300px;
+	margin-left : -150px;
+}
